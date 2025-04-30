@@ -190,3 +190,27 @@ cron.schedule('0 0 * * *', async () => {
   });
   console.log(`Expired ${expiredUsers.length} VIP memberships`);
 });
+const mongoose = require('mongoose');
+const User = require('../models/User');
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI);
+
+// Find and expire VIP users
+async function expireVIPs() {
+  const expiredUsers = await User.find({
+    isVIP: true,
+    vipExpiresAt: { $lt: new Date() }
+  });
+
+  expiredUsers.forEach(async (user) => {
+    user.isVIP = false;
+    await user.save();
+    console.log(`Expired VIP for ${user.email}`);
+  });
+
+  console.log('Done!');
+  process.exit();
+}
+
+expireVIPs();
