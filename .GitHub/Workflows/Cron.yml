@@ -1,0 +1,25 @@
+name: Daily VIP Expiration Check
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at midnight UTC every day
+  workflow_dispatch: # Lets you run it manually
+
+jobs:
+  check-expired-vips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run expiration script
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }} # Your secret database password
+        run: node scripts/expire-vips.js
